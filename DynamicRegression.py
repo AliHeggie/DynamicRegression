@@ -30,17 +30,17 @@ class dynamic_regression(sm.tsa.statespace.MLEModel):
     exog : array_like or None, optional
         Exogenous variables.
     exog_models : dict or list of dicts, optional
-        Either a dict, a list containing a single dict, or a list of dicts,
-        one for each exogonous regressor.
+        Either a dict, a list containing a single dict, or a list of dict
+        s, one for each exogonous regressor.
         Admisble keys are the supported component types: 'irregular', 
-        'local_level', and 'trend'. If a key is included in the dict and it's
-        value is not False, then it is included in the model. If the 
-        corresponding value is "deterministic" then the state corresponding
-        to that component will not have a disturbance term.
+        'local_level', and 'trend'. If a key is included in the dict and 
+        it's value is not False, then it is included in the model. If the 
+        corresponding value is "deterministic" then the state 
+        corresponding to that component will not have a disturbance term.
     dynamic_regression : bool
-        Whether or not the regression coefficient updates over time. If False
-        then the states corresponding to the regression coefficients have 0
-        variance.
+        Whether or not the regression coefficient updates over time. If 
+        False then the states corresponding to the regression 
+        coefficients have 0 variance.
     """
     def __init__(self, endog, exog,exog_models={"local_level":True}):
         #Get k_exog from size of exog data
@@ -148,6 +148,7 @@ class dynamic_regression(sm.tsa.statespace.MLEModel):
         return design
 
     def exog_design(self,mod):
+        """Part of design matric for the UC model defined by mod"""
         d = np.zeros(0)
         if mod["irregular"]:
             d = np.r_[d,np.ones(1)]
@@ -277,8 +278,29 @@ class dynamic_regression(sm.tsa.statespace.MLEModel):
         unconstrained[start:] = np.sqrt(constrained[start:])
         return unconstrained
 
-def plot_dynamic_regression(results,which="smoothed",alpha=None,figsize=None,
-    fitted=True,components=True):
+def plot_dynamic_regression(results,which="smoothed",figsize=None,
+    fitted=True,coefficients=True):
+    """
+    Plot the fitted values and/or estimates of time-varying regression
+    coefficients
+    This should be replaced with a customer Results object that has
+    properties to access the various components of the state vector
+    and plotting methods.
+
+    Parameters
+    ----------
+    results : MLEresults object
+        results object returned from fit method
+    which : string or None
+        If "filtered" plot the filtered results, otherwise use smoother results
+    figsize : tuple of two numbers or None
+        figsize passed to pandas plot methods to determine the size of each
+        plot
+    fitted : bool
+        if True display the fitted values
+    coefficients : bool
+        if True display the estimated coefficients
+    """
     if which == "filtered":
         state = results.filtered_state
         fitted_values = results.filter_results.forecasts[0]
@@ -286,10 +308,10 @@ def plot_dynamic_regression(results,which="smoothed",alpha=None,figsize=None,
         state = results.smoothed_state
         fitted_values = results.smoother_results.smoothed_forecasts[0]
     endog = results.model.endog
-    if fitted == True:
+    if fitted:
         pd.DataFrame({"endog":endog[:,0],"fitted_values":fitted_values}
             ).plot(figsize=figsize)
-    if components == True:
+    if coefficients:
         if which == "filtered":
             design = block_diag(tuple(results.model.exog_design(mod) 
                 for mod in results.model.exog_models))@results.filtered_state
