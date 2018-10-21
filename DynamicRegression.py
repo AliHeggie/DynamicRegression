@@ -4,12 +4,11 @@ Univariate time-varying coefficient regression model
 Author: Alastair Heggie
 License: Simplified-BSD
 """
-import pdb
 import numpy as np
-from scipy.signal import lfilter
 from scipy.linalg import block_diag
 import statsmodels.api as sm
 import pandas as pd
+import warnings
 import statsmodels.base.wrapper as wrap
 from statsmodels.tsa.statespace.mlemodel import MLEModel, MLEResults, MLEResultsWrapper
 from statsmodels.tsa.statespace.tools import (constrain_stationary_univariate,
