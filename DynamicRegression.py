@@ -666,6 +666,22 @@ class DynamicRegressionResults(MLEResults):
         super(DynamicRegressionResults, self).__init__(
             model, params, filter_results, cov_type, **kwargs)
 
+    @property
+    def smoothed_coefficients(self):
+        state = self.smoothed_state
+        design = block_diag(*tuple(self.model.exog_design(mod)
+                            for mod in self.model.exog_models)
+                            )@state
+        return pd.DataFrame(design.transpose())
+
+    @property
+    def filtered_coefficients(self):
+        state = self.filtered_state
+        design = block_diag(*tuple(self.model.exog_design(mod)
+                            for mod in self.model.exog_models)
+                            )@state
+        return pd.DataFrame(design.transpose())
+
     def plot_dynamic_regression(self, which="smoothed", figsize=None,
                                 fitted=True, coefficients=True):
         """
